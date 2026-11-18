@@ -70,16 +70,27 @@ ASGI_APPLICATION = 'config.asgi.application'
 # SQLite locally; set DATABASE_URL (PostgreSQL) in production.
 # DATABASES = {'default': dj_database_url.config(
 #     default=f'sqlite:///{BASE_DIR / "db.sqlite3"}', conn_max_age=600)}
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "NAME": "sakthi_dba",
+#         "USER": "postgres",
+#         "PASSWORD": "postgres",
+#         "HOST": "localhost",
+#         "PORT": "5432",
+#     }
+# }
+
+
+# SQLite locally; PostgreSQL on Render.
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "sakthi_dba",
-        "USER": "postgres",
-        "PASSWORD": "postgres",
-        "HOST": "localhost",
-        "PORT": "5432",
-    }
+    'default': dj_database_url.config(
+        default='postgresql://postgres:postgres@localhost:5432/sakthi_dba',
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
 }
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},

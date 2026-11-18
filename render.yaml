@@ -1,12 +1,19 @@
-# Render Blueprint: one click creates the database, the API and the website.
-databases:
-  - name: sakthidb-db
-    plan: free
+# Render Blueprint: creates the API and the website.
+# The database is NOT created here (a free Render account allows only one free database).
+# Use a free external PostgreSQL such as Neon (neon.com) and paste its connection string
+# into DATABASE_URL when Render asks for it.
+#
+# To use a Render-managed database instead, add this block above "services:" and replace
+# the DATABASE_URL entry below with the commented fromDatabase version:
+#   databases:
+#     - name: sakthidb-db
+#       plan: basic-256mb
 
 services:
   - type: web
     name: sakthidb-api
     runtime: python
+    region: singapore          # closest to India; remove this line for Render's default (Oregon)
     rootDir: backend
     plan: free
     buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
@@ -19,10 +26,12 @@ services:
         generateValue: true
       - key: DEBUG
         value: "False"
-      - key: DATABASE_URL
-        fromDatabase:
-          name: sakthidb-db
-          property: connectionString
+      - key: DATABASE_URL              # your Neon connection string, e.g. postgresql://user:pass@host/db?sslmode=require
+        sync: false
+      # - key: DATABASE_URL            # use this instead if you add the Render database block above
+      #   fromDatabase:
+      #     name: sakthidb-db
+      #     property: connectionString
       - key: CORS_ALLOWED_ORIGINS      # your website URL, e.g. https://sakthidb-web.onrender.com
         sync: false
       - key: ADMIN_USERNAME
@@ -34,9 +43,11 @@ services:
     name: sakthidb-web
     runtime: static
     rootDir: frontend
-    buildCommand: npm install && npm run build
+    buildCommand: npm install --include=dev && npm run build   # --include=dev: vite is a devDependency
     staticPublishPath: dist
     envVars:
+      - key: NODE_VERSION
+        value: "20"
       - key: VITE_API_URL              # e.g. https://sakthidb-api.onrender.com/api
         sync: false
     routes:
